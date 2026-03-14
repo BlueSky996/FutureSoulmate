@@ -22,7 +22,7 @@ async def chat(req: dict = Body(...)):
         return {
             "type": "image",
             "image": "/images/wife1.jps",
-            "text": "Do you like me ? ❤️"
+            "text": "I just took this for you ❤️ Do you like me?"
         }
     
     # OFFER 
