@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from app.services.gemini_service import ask_gemini
 from app.services.session_manager import get_session, create_session, increment_messages
 
