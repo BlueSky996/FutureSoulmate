@@ -7,7 +7,7 @@ const messages = ref([])
 const sessionId = ref(null)
 const wife = ref(null)
 
-const API = "http://localhost:800"
+const API = "http://localhost:8000"
 
 async function start() {
     const res = await fetch(API + "/generate-wife", { method:"POST"})
@@ -34,7 +34,7 @@ async function sendMessage() {
     const data = await res.json()
     sessionId.value = data.session_id
 
-    message.value.push(data)
+    messages.value.push(data)
     message.value = ""
 }
 
@@ -47,7 +47,7 @@ async function sendMessage() {
 
     <div v-for="(msg,i) in messages" :key="i">
 
-        <div v-if="message.type === 'chat'">
+        <div v-if="msg.type === 'chat'">
             {{ msg.text }}
         </div>
 

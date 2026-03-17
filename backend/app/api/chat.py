@@ -8,13 +8,16 @@ OFFER_LINK = "https://www.google.com"
 
 @router.post("/chat")
 async def chat(req: dict = Body(...)):
-    sid = req.get("session_id") or create_session()
 
-    user_msg = req.get("message")
+    sid = req.get("session_id") or create_session()
+    user_msg = req.get("message", "")
     wife_data = req["wife"]
 
-    session = get_session(sid)
+    if not wife_data:
+        return {"error": "wife data missing", "status": 400}
+
     increment_messages(sid)
+    session = get_session(sid)
     messages = session["messages"]
 
     # LEVEL 1

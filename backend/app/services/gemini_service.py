@@ -1,9 +1,11 @@
-import google.generativeai as genai 
+from google import genai
+from dotenv import load_dotenv
 import os
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+load_dotenv()
 
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
 
 def ask_gemini(wife, message):
 
@@ -28,5 +30,9 @@ User: {message}
 Reply:
 """
     
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=prompt
+    )
+
     return response.text

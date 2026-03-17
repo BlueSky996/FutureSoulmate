@@ -2,16 +2,12 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import chat, upload, wife
+from app.services import wife_generator
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = FastAPI()
-
-app.include_router(chat.router)
-app.include_router(upload.router)
-app.include_router(wife.router)
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,6 +15,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(chat.router)
+app.include_router(upload.router)
+app.include_router(wife_generator.router)
+app.include_router(wife.router)
 
 
 app.mount("/images", StaticFiles(directory="images"), name="images")
