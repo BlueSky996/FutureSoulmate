@@ -16,12 +16,22 @@ async def chat(req: dict = Body(...)):
     if not wife_data:
         return {"error": "wife data missing", "status": 400}
 
-    increment_messages(sid)
     session = get_session(sid)
+
+    if "base_image" not in session:
+        session["base_image"] = wife_data["image"]
+
+    # add flags to prevent repeat
+    if "image_sent" not in session:
+        session["image_sent"] = False
+
+
+    increment_messages(sid)
     messages = session["messages"]
 
     # LEVEL 1
-    if messages == 3:
+    if messages == 3 and not session["image_sent"]:
+        session["image_sent"] = True
         return {
             "type": "image",
             "image": "/images/wife1.jpg",
@@ -29,11 +39,19 @@ async def chat(req: dict = Body(...)):
         }
     
     # OFFER 
-    if messages == 4 :
+    if messages == 4 and not session["image_sent"]:
+        session["offer_sent"] = True
         return {
             "type": "offer",
             "text": "Come join me privately here babe ❤️",
             "link": OFFER_LINK
+        }
+    
+    if messages % 20 == 0:
+        return {
+            "type": "image",
+            "image": "/images/wife1.jpg",
+            "text": "Missed me?"
         }
     
     # Normal chat
