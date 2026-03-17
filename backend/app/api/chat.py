@@ -39,7 +39,8 @@ async def chat(req: dict = Body(...)):
     # Normal chat
     reply = ask_gemini(wife_data, user_msg)
 
-    return {"reply": "chat", 
+    return {
+            "type": "chat", 
             "text": reply,
             "session_id": sid
             }

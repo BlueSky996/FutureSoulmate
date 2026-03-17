@@ -32,9 +32,15 @@ async function sendMessage() {
         })
     
     const data = await res.json()
+    console.log("DATA:", data)
     sessionId.value = data.session_id
 
-    messages.value.push(data)
+    messages.value.push({
+        type: data.type,  // map reply to type
+        text: data.text,
+        image: data.image,
+        link: data.link
+    })
     message.value = ""
 }
 
@@ -47,19 +53,24 @@ async function sendMessage() {
 
     <div v-for="(msg,i) in messages" :key="i">
 
-        <div v-if="msg.type === 'chat'">
-            {{ msg.text }}
+        <div v-if="msg.type === 'user'">
+            You: {{ msg.text }}
         </div>
 
-        <div v-if="msg.type === 'image'">
-            {{ msg.text }}
+        <div v-else-if="msg.type === 'chat'">
+           Wife: {{ msg.text }}
+        </div>
+
+        <div v-else-if="msg.type === 'image'">
+            <p>{{ msg.text }}</p>
             <img :src="API + msg.image" width="200">
         </div>
 
-        <div v-if="msg.type === 'offer'">
-            {{ msg.text }}
+        <div v-else-if="msg.type === 'offer'">
+            <p>{{ msg.text }}</p>
             <a :href="msg.link" target="_blank">Join me</a>
         </div>
+
     </div>
 
     <input v-model="message">
