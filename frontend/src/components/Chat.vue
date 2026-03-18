@@ -3,7 +3,6 @@ import { ref } from "vue"
 
 const message = ref("")
 const messages = ref([])
-
 const sessionId = ref(null)
 const wife = ref(null)
 

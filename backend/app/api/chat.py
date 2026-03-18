@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Body
 from app.services.gemini_service import ask_gemini
 from app.services.session_manager import get_session, create_session, increment_messages
+from app.services.wife_generator import generate_wife_pose
 
 router = APIRouter()
 
@@ -20,11 +21,9 @@ async def chat(req: dict = Body(...)):
 
     if "base_image" not in session:
         session["base_image"] = wife_data["image"]
-
     # add flags to prevent repeat
     if "image_sent" not in session:
         session["image_sent"] = False
-
 
     increment_messages(sid)
     messages = session["messages"]
@@ -35,7 +34,8 @@ async def chat(req: dict = Body(...)):
         return {
             "type": "image",
             "image": "/images/wife1.jpg",
-            "text": "I just took this for you ❤️ Do you like me?"
+            "text": "I just took this for you ❤️ Do you like me?",
+            "session_id": sid
         }
     
     # OFFER 
@@ -44,14 +44,22 @@ async def chat(req: dict = Body(...)):
         return {
             "type": "offer",
             "text": "Come join me privately here babe ❤️",
-            "link": OFFER_LINK
+            "link": OFFER_LINK,
+            "session_id": sid
         }
     
-    if messages % 20 == 0:
+    if messages > 4 and messages % 20 == 0:
+        new_img = generate_wife_pose(
+            wife_data,
+            session["base_image"],
+            prompt_extra="sending a teasing selfie"
+        )
+
         return {
             "type": "image",
-            "image": "/images/wife1.jpg",
-            "text": "Missed me?"
+            "image": new_img,
+            "text": "Missed me?",
+            "session_id": sid
         }
     
     # Normal chat

@@ -23,7 +23,7 @@ app.include_router(wife_generator.router)
 app.include_router(wife.router)
 
 
-app.mount("/images", StaticFiles(directory="images"), name="images")
+app.mount("/images", StaticFiles(directory="app/static/images"), name="images")
 
 
 @app.get("/")
