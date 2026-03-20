@@ -37,7 +37,7 @@ def generate_wife_image(wife: dict) -> str:
     prompt = f"""
     Beautiful woman named {wife['name']}, age {wife['age']},
     traits: {', '.join(wife['traits'])},
-    religon: {wife['religions']}
+    religon: {wife['religion']}
     realistic portrait, soft lighting, high quality, selfie, teasing
     """
 
@@ -51,19 +51,21 @@ def generate_wife_image(wife: dict) -> str:
     try:
         for part in response.candidates[0].content.parts:
             if hasattr(part, "inline_data") and part.inline_data:
-                data = getattr(part.inline_data, "data", None)
+                data = part.inline_data.data
             if isinstance(data, (bytes, bytearray)):
                 image_bytes = data
             else:
                 image_bytes = base64.b64decode(data)
             break
-    except Exception:
-        image_bytes = None
 
-    if not image_bytes:
-        return "/images/fallback.jpg"
+        if not image_bytes:
+            return "/images/fallback.jpg"
     
-    return _save_image_bytes(image_bytes)
+        return _save_image_bytes(image_bytes)
+
+    except Exception as e:
+        print("GEMINI ERROR", e)
+        return "/images/fallback.jpg"
 
 
 @router.get("/wife-options")
@@ -140,13 +142,15 @@ def generate_wife_pose(wife: dict, base_image_path: str, prompt_extra: str = "")
                     import base64
                     image_bytes = base64.b64decode(data)
                 break
-    except Exception:
-        image_bytes = None
 
-    if not image_bytes:
-        return base_image_path
+        if not image_bytes:
+            return base_image_path
 
-    return _save_image_bytes(image_bytes)
+        return _save_image_bytes(image_bytes)
+
+    except Exception as e:
+        print("GEMINI ERROR", e)
+        return "/images/fallback.jpg"
 
 
 # optional endpoint to call pose generation via HTTP
