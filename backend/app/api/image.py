@@ -5,6 +5,14 @@ router = APIRouter()
 
 @router.post("/generate-image")
 def gen_image(body: dict = Body(...)):
-    # body: {session_id, user_image_url, wife_avatar_url, style}
-    out_url = generate_couple_image(body["user_image_url"], body["wife_avatar_url"])
+    # SAFE GETS (avoid crash)
+    user_img = body.get("user_image_url")
+    soulmate_img = body.get("soulmate_avatar_url")
+
+    # VALIDATION
+    if not user_img or not soulmate_img:
+        return {"error": "missing images"}
+
+    out_url = generate_couple_image(user_img, soulmate_img)
+
     return {"image_url": out_url}

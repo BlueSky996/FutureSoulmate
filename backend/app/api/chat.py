@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body
 from app.services.gemini_service import ask_gemini
 from app.services.session_manager import get_session, create_session, increment_messages
-from app.services.wife_generator import generate_wife_pose
+from app.services.soulmate_generator import generate_soulmate_pose
 
 router = APIRouter()
 
@@ -12,15 +12,15 @@ async def chat(req: dict = Body(...)):
 
     sid = req.get("session_id") or create_session()
     user_msg = req.get("message", "")
-    wife_data = req["wife"]
+    soulmate_data = req["soulmate"]
 
-    if not wife_data:
-        return {"error": "wife data missing", "status": 400}
+    if not soulmate_data:
+        return {"error": "soulmate data missing", "status": 400}
 
     session = get_session(sid)
 
     if "base_image" not in session:
-        session["base_image"] = wife_data["image"]
+        session["base_image"] = soulmate_data["image"]
     # add flags to prevent repeat
     if "image_sent" not in session:
         session["image_sent"] = False
@@ -33,8 +33,8 @@ async def chat(req: dict = Body(...)):
         session["image_sent"] = True
         return {
             "type": "image",
-            "image": "/images/wife1.jpg",
-            "text": "I just took this for you ❤️ Do you like me?",
+            "image": "/images/soulmate1.jpg",
+            "text": "I just took this for you ❤️",
             "session_id": sid
         }
     
@@ -43,14 +43,14 @@ async def chat(req: dict = Body(...)):
         session["offer_sent"] = True
         return {
             "type": "offer",
-            "text": "Come join me privately here babe ❤️",
+            "text": "Come join me here and let's talk more! my subscription is about to end ",
             "link": OFFER_LINK,
             "session_id": sid
         }
     
     if messages > 4 and messages % 20 == 0:
-        new_img = generate_wife_pose(
-            wife_data,
+        new_img = generate_soulmate_pose(
+            soulmate_data,
             session["base_image"],
             prompt_extra="sending a teasing selfie"
         )
@@ -63,7 +63,7 @@ async def chat(req: dict = Body(...)):
         }
     
     # Normal chat
-    reply = ask_gemini(wife_data, user_msg)
+    reply = ask_gemini(soulmate_data, user_msg)
 
     return {
             "type": "chat", 

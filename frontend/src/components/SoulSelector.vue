@@ -1,6 +1,6 @@
 <template>
   <div class="setup">
-    <h2>Create your wife</h2>
+    <h2>Create your Soulmate</h2>
 
     <label class="field">
       <span>Name</span>
@@ -53,7 +53,7 @@ const selectedReligion = ref("")
 
 onMounted(async () => {
   try {
-    const res = await fetch(API + "/wife-options")
+    const res = await fetch(API + "/soulmate-options")
     const data = await res.json()
     names.value = data.names || []
     traits.value = data.traits || []
