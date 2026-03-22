@@ -6,23 +6,19 @@ router = APIRouter()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-names = ["Luna", "Maya", "Sara", "Layla"]
+male_names = ["Liam", "Noah", "Ethan", "Zayn"]
+female_names = ["Luna", "Maya", "Sara", "Layla"]
 
 traits = [
-    "sweet",
-    "playful",
-    "loyal",
-    "jealous",
-    "teasing",
-    "sissy",
-    "shy",
-    "baddy",
+    "sweet","playful","loyal","jealous","teasing",
+    "shy","confident","romantic","dominant","soft"
 ]
 
 religions = ['christian','muslim','jew','hindu','catholic']
 
 IMAGE_DIR = os.path.join("app", "static", "images")
 os.makedirs(IMAGE_DIR, exist_ok=True)
+
 
 
 def _save_image_bytes(image_bytes: bytes) -> str:
@@ -33,16 +29,16 @@ def _save_image_bytes(image_bytes: bytes) -> str:
     return f"/images/{filename}"
 
 
-def generate_wife_image(wife: dict) -> str:
+def generate_soulmate_image(soulmate: dict) -> str:
     prompt = f"""
-    Beautiful woman named {wife['name']}, age {wife['age']},
-    traits: {', '.join(wife['traits'])},
-    religon: {wife['religion']}
-    realistic portrait, soft lighting, high quality, selfie, teasing
+    Beautiful woman named {soulmate['name']}, age {soulmate['age']},
+    traits: {', '.join(soulmate['traits'])},
+    religon: {soulmate['religion']}
+    realistic portrait, soft lighting, high quality, selfie,
     """
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash-image",
+        model="gemini-3.1-flash-image-preview",
         contents=prompt
     )
 
@@ -68,37 +64,44 @@ def generate_wife_image(wife: dict) -> str:
         return "/images/fallback.jpg"
 
 
-@router.get("/wife-options")
-def wife_options():
+@router.get("/soulmate-options")
+def soulmate_options():
     return {
-        "names": names,
+        "male_names": male_names,
+        "female_names": female_names,
         "traits": traits,
-        "religions": religions
+        "religions": religions,
+        "genders": ["males", "female"]
     }
 
 
-@router.post("/generate-wife")
-def generate_wife(req: dict = Body(...)):
+@router.post("/generate-soulmate")
+def generate_soulmate(req: dict = Body(...)):
 
-    user_traits = req.get("traits")
-    user_name = req.get("name")
+    gender = req.get("gender", "female")
+    if gender == "male":
+       name = req.get("name") or random.choice(male_names)
+    else:
+       name = req.get("name") or random.choice(male_names)
+            
 
-    wife = {
-        "name": user_name or random.choice(names),
+    soulmate = {
+        "name": name,
+        "gender": gender,
         "age": random.randint(20,35),
-        "traits": user_traits if user_traits else random.sample(traits,2),
+        "traits": req.get("traits") or random.sample(traits,2),
         "religion": req.get("religion") or random.choice(religions),
     }
 
     # generate image after character is created
-    image_url = generate_wife_image(wife) # gemini call
-    wife["image"] = image_url
-    wife["base_image"] = wife["image"]
+    image_url = generate_soulmate_image(soulmate) # gemini call
+    soulmate["image"] = image_url
+    soulmate["base_image"] = image_url
 
-    return wife
+    return soulmate
 
 
-def generate_wife_pose(wife: dict, base_image_path: str, prompt_extra: str = "") -> str:
+def generate_soulmate_pose(soulmate: dict, base_image_path: str, prompt_extra: str = "") -> str:
     # compute file path on disk
     if base_image_path.startswith("/"):
         disk_path = os.path.join("app", "static", base_image_path.lstrip("/"))
@@ -109,15 +112,14 @@ def generate_wife_pose(wife: dict, base_image_path: str, prompt_extra: str = "")
         base_image_bytes = f.read()
 
     prompt = f"""
-    Same woman as reference image.
-    Name: {wife['name']}, traits: {', '.join(wife['traits'])}.
+    Name: {soulmate['gender']}, traits: {', '.join(soulmate['traits'])}.
     Keep same face, same identity.
     New pose: {prompt_extra}
     realistic, high quality, soft lighting
     """
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash-image",
+        model="gemini-3.1-flash-image-preview",
         contents=[
             {"text": prompt},
             {
@@ -154,9 +156,9 @@ def generate_wife_pose(wife: dict, base_image_path: str, prompt_extra: str = "")
 
 
 # optional endpoint to call pose generation via HTTP
-@router.post("/generate-wife-pose")
-def generate_wife_pose_endpoint(req: dict = Body(...)):
-    wife = req.get("wife")
+@router.post("/generate-soulmate-pose")
+def generate_soulmate_pose_endpoint(req: dict = Body(...)):
+    soulmate = req.get("soulmate")
     base = req.get("base_image")
     extra = req.get("prompt_extra", "")
-    return {"image": generate_wife_pose(wife, base, extra)}
+    return {"image": generate_soulmate_pose(soulmate, base, extra)}
